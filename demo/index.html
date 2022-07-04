@@ -1,0 +1,10 @@
+<html>
+<body>
+<script type="module">
+    import RPC from "/js/rpc.min.js"
+
+    const API = RPC("/api");
+    const total = await API.sum(1, 2);
+</script>
+</body>
+</html>
