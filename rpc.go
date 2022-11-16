@@ -12,20 +12,22 @@ import (
 // Index object's (usually pointer to struct) method. Matched public methods will be wrapped to http handler, which
 // parses request body as JSON array and passes it to function. Result will be returned also as json.
 //
+// # Supported methods
+//
 // Criteria for matching methods: no return values, or single return value/error, or two return values, where second one
 // must be an error. First input argument could be context.Context which will be automatically wired from request.Context().
 //
-//     Foo()                                          // OK
-//     Foo(ctx context.Context)                       // OK
-//     Foo(ctx context.Context, bar int, baz SomeObj) // OK
-//     Foo(bar int, baz string)                       // OK
+//		Foo()                                          // OK
+//		Foo(ctx context.Context)                       // OK
+//		Foo(ctx context.Context, bar int, baz SomeObj) // OK
+//		Foo(bar int, baz string)                       // OK
 //
-//     Foo(...) error        // OK
-//     Foo(...) int          // OK
-//     Foo(...) (int, error) // OK
-//     Foo(...) (int, int)   // NOT ok - last argument is not an error
+//		Foo(...) error        // OK
+//		Foo(...) int          // OK
+//		Foo(...) (int, error) // OK
+//	    Foo(...) (int, int)   // NOT ok - last argument is not an error
 //
-// Handler will return
+// # Status codes
 //
 // 400 Bad Request in case payload can not be unmarshalled to arguments or number of arguments not enough.
 //
@@ -53,6 +55,10 @@ func Index(object interface{}) map[string]*ExposedMethod {
 		}
 
 		hasResponse := out == 1 && !hasError || out == 2
+		var responseType reflect.Type
+		if hasResponse {
+			responseType = method.Type.Out(0)
+		}
 
 		hasContext := args > 1 && method.Type.In(1).Implements(ctxInterface)
 
@@ -67,14 +73,15 @@ func Index(object interface{}) map[string]*ExposedMethod {
 		}
 
 		em := &ExposedMethod{
-			args:        args,
-			receiver:    value,
-			argTypes:    argTypes,
-			hasResponse: hasResponse,
-			hasContext:  hasContext,
-			hasError:    hasError,
-			offset:      offset,
-			method:      method,
+			args:         args,
+			receiver:     value,
+			argTypes:     argTypes,
+			responseType: responseType,
+			hasResponse:  hasResponse,
+			hasContext:   hasContext,
+			hasError:     hasError,
+			offset:       offset,
+			method:       method,
 		}
 
 		handler := em
@@ -84,14 +91,15 @@ func Index(object interface{}) map[string]*ExposedMethod {
 }
 
 type ExposedMethod struct {
-	args        int
-	receiver    reflect.Value
-	argTypes    []reflect.Type
-	hasResponse bool
-	hasContext  bool
-	hasError    bool
-	offset      int
-	method      reflect.Method
+	args         int
+	receiver     reflect.Value
+	argTypes     []reflect.Type
+	responseType reflect.Type
+	hasResponse  bool
+	hasContext   bool
+	hasError     bool
+	offset       int
+	method       reflect.Method
 }
 
 func (em *ExposedMethod) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -160,10 +168,9 @@ func (em *ExposedMethod) invoke(receiver reflect.Value, writer http.ResponseWrit
 // Router creates mux handler which exposes all indexed method with name as path, in lower case,
 // and only for POST method.
 //
-//     http.Handle("/api/", http.StripPrefix("/api", Router(...)))
+//		http.Handle("/api/", http.StripPrefix("/api", Router(...)))
 //
-//     MyFoo(..) -> POST /myfoo
-//
+//	  	MyFoo(..) -> POST /myfoo
 func Router(index map[string]*ExposedMethod) http.Handler {
 	mux := http.NewServeMux()
 	for name, handler := range index {
@@ -181,17 +188,17 @@ func Router(index map[string]*ExposedMethod) http.Handler {
 
 // Builder creates new path-based, POST-only router, with custom receiver (aka session) for each request.
 //
-//     type API struct {
-//         User string // to be filled by Server
-//     }
-//     type Server struct {}
-//     func (srv *Server) newAPI(r *http.Request) (*API, error) {}
+//		type API struct {
+//	   		User string // to be filled by Server
+//		}
+//		type Server struct {}
+//		func (srv *Server) newAPI(r *http.Request) (*API, error) {}
 //
-//     // ...
-//     var server Server
-//     handler := Builder(server.newAPI)
+//		// ...
+//		var server Server
+//		handler := Builder(server.newAPI)
 //
-// Handler will return
+// # Status codes
 //
 // 400 Bad Request in case payload can not be unmarshalled to arguments or number of arguments not enough.
 //
