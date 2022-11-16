@@ -29,11 +29,9 @@ import (
 //
 // # Status codes
 //
-// 400 Bad Request in case payload can not be unmarshalled to arguments or number of arguments not enough.
-//
-// 500 Internal Server Error in case method returned an error. Response payload will be error message (plain text)
-//
-// 200 OK in case everything fine
+// - 400 Bad Request in case payload can not be unmarshalled to arguments or number of arguments not enough.
+// - 500 Internal Server Error in case method returned an error. Response payload will be error message (plain text)
+// - 200 OK in case everything fine
 func Index(object interface{}) map[string]*ExposedMethod {
 	value := reflect.ValueOf(object)
 	t := value.Type()
@@ -200,13 +198,10 @@ func Router(index map[string]*ExposedMethod) http.Handler {
 //
 // # Status codes
 //
-// 400 Bad Request in case payload can not be unmarshalled to arguments or number of arguments not enough.
-//
-// 404 Not Found in case method is not known (case-insensitive).
-//
-// 500 Internal Server Error in case method returned an error or factory returned error. Response payload will be error message (plain text)
-//
-// 200 OK in case everything fine
+// - 400 Bad Request in case payload can not be unmarshalled to arguments or number of arguments not enough.
+// - 404 Not Found in case method is not known (case-insensitive).
+// - 500 Internal Server Error in case method returned an error or factory returned error. Response payload will be error message (plain text)
+// - 200 OK in case everything fine
 func Builder[T any](factory func(r *http.Request) (T, error)) http.Handler {
 	var t T
 	handlers := Index(t)
