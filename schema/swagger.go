@@ -2,7 +2,9 @@
 package schema
 
 import (
+	"encoding/json"
 	"math"
+	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
@@ -64,6 +66,19 @@ type Type struct {
 	MaxItems    int              `json:"maxItems,omitempty" yaml:"maxItems,omitempty"`
 	Description string           `json:"description,omitempty" yaml:"description,omitempty"`
 	Name        string           `json:"-" yaml:"-"`
+}
+
+// Handler exposes OpenAPI 3.1 cached pre-generated spec. See [OpenAPI]
+func Handler(index map[string]*rpc.ExposedMethod, options ...Option) http.Handler {
+	render, err := json.Marshal(OpenAPI(index, options...))
+	if err != nil {
+		panic(err) // this is impossible situation unless something like OOM happen
+	}
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusOK)
+		_, _ = writer.Write(render)
+	})
 }
 
 // Option configures schema creation.
