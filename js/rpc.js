@@ -2,27 +2,18 @@ export default function RPC(baseURL = "") {
     return new Proxy({}, {
         get(obj, method) {
             method = method.toLowerCase();
-            if (method in obj) {
-                return obj[method]
-            }
-
-            const url = baseURL + "/" + encodeURIComponent(method)
-            const fn = async function () {
-                const args = Array.prototype.slice.call(arguments);
-                const res = await fetch(url, {
+            if (method in obj) return obj[method]
+            return obj[method] = async () => {
+                const res = await fetch(baseURL + "/" + encodeURIComponent(method), {
                     method: "POST",
-                    body: JSON.stringify(args),
+                    body: JSON.stringify(Array.prototype.slice.call(arguments)),
                     headers: {
                         "Content-Type": "application/json"
                     }
                 })
-                if (!res.ok) {
-                    const errMessage = await res.text();
-                    throw new Error(errMessage);
-                }
+                if (!res.ok) throw new Error(await res.text());
                 return await res.json()
             }
-            return obj[method] = fn
         }
     })
 }

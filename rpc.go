@@ -2,12 +2,27 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
 )
+
+// JS is embedded content of supporting script. Can be served as-is.
+//
+//go:embed js/rpc.min.js
+var JS []byte
+
+// Script exposes embedded JS helper as endpoint.
+func Script() http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "application/javascript")
+		writer.WriteHeader(http.StatusOK)
+		_, _ = writer.Write(JS)
+	})
+}
 
 // Index object's (usually pointer to struct) method. Matched public methods will be wrapped to http handler, which
 // parses request body as JSON array and passes it to function. Result will be returned also as json.
