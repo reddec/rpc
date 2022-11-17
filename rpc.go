@@ -100,6 +100,18 @@ type ExposedMethod struct {
 	method       reflect.Method
 }
 
+func (em *ExposedMethod) Args() []reflect.Type {
+	return em.argTypes
+}
+
+func (em *ExposedMethod) HasResponse() bool {
+	return em.hasResponse
+}
+
+func (em *ExposedMethod) Response() reflect.Type {
+	return em.responseType
+}
+
 func (em *ExposedMethod) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	em.invoke(em.receiver, writer, request)
 }

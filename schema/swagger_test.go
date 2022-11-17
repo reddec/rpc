@@ -1,4 +1,4 @@
-package rpc_test
+package schema_test
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/reddec/rpc"
+	"github.com/reddec/rpc/schema"
 )
 
 type Account struct {
@@ -16,6 +17,8 @@ type Account struct {
 		Domain string
 		Path   string
 	}
+	Cents       uint
+	SubAccounts []*Account
 }
 
 type User struct {
@@ -25,9 +28,15 @@ type User struct {
 	Address  struct {
 		Country string
 		City    string
+		ZIP     int
 	}
-	Accounts  []*Account
-	CreatedAt time.Time
+	Accounts   []*Account
+	Primary    Account
+	CreatedAt  time.Time
+	TTL        time.Duration
+	Registered bool
+	Age        int8
+	Status     byte
 }
 
 type Server struct{}
@@ -44,7 +53,9 @@ func (srv *Server) RemoveAllUsers() {
 }
 
 func TestOpenAPI(t *testing.T) {
-	schema := rpc.OpenAPI[Server]()
+	var srv Server
+	index := rpc.Index(&srv)
+	schema := schema.OpenAPI(index, schema.Version("1.0.0"))
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
 	enc.SetIndent("", "  ")
