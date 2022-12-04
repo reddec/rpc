@@ -14,7 +14,8 @@ import (
 
 // Schema represents OpenAPI definition of endpoints.
 type Schema struct {
-	OpenAPI string `json:"openapi" yaml:"openapi"`
+	OpenAPI string   `json:"openapi" yaml:"openapi"`
+	Servers []Server `json:"servers,omitempty" yaml:"servers,omitempty"`
 	Info    struct {
 		Title   string `json:"title" yaml:"title"`
 		Version string `json:"version" yaml:"version"`
@@ -23,6 +24,11 @@ type Schema struct {
 	Components struct {
 		Schemas map[string]*Type `json:"schemas,omitempty" yaml:"schemas,omitempty"`
 	} `json:"components,omitempty" yaml:"components,omitempty"`
+}
+
+// Server represents reference to API server.
+type Server struct {
+	URL string `json:"url,omitempty" yaml:"url,omitempty"`
 }
 
 type Path struct {
@@ -68,9 +74,15 @@ type Type struct {
 	Name        string           `json:"-" yaml:"-"`
 }
 
-// Handler exposes OpenAPI 3.1 cached pre-generated spec. See [OpenAPI]
+// Handler exposes OpenAPI 3.1 cached pre-generated spec. See [OpenAPI].
+// This is just an alias to Expose(OpenAPI()).
 func Handler(index map[string]*rpc.ExposedMethod, options ...Option) http.Handler {
-	render, err := json.Marshal(OpenAPI(index, options...))
+	return Expose(OpenAPI(index, options...))
+}
+
+// Expose schema as pre-generated, cached JSON.
+func Expose(schema *Schema) http.Handler {
+	render, err := json.Marshal(schema)
 	if err != nil {
 		panic(err) // this is impossible situation unless something like OOM happen
 	}
@@ -169,6 +181,7 @@ type schemaBuilder struct {
 	names      map[string]int
 	hooks      map[schemaRef]*Type
 	defaults   schemaDefaults
+	urls       []string
 }
 
 func (sb *schemaBuilder) walk(t reflect.Type) *Type {
@@ -290,6 +303,11 @@ func (sb *schemaBuilder) build(index map[string]*rpc.ExposedMethod) *Schema {
 		OpenAPI: "3.1.0",
 		Paths:   map[string]Path{},
 	}
+	schema.Info.Title = sb.title
+	schema.Info.Version = sb.version
+	for _, u := range sb.urls {
+		schema.Servers = append(schema.Servers, Server{URL: u})
+	}
 
 	// we are preparing all response types since they all the same for all endpoints.
 	var errorType = &ContentType{Schema: sb.defaults.String}
@@ -355,5 +373,12 @@ func Define(pkg, name string, definition *Type) Option {
 			pkg:  pkg,
 			name: name,
 		}] = definition
+	}
+}
+
+// URL for OpenAPI server.
+func URL(urls ...string) Option {
+	return func(builder *schemaBuilder) {
+		builder.urls = urls
 	}
 }
