@@ -3,7 +3,7 @@ export default function RPC(baseURL = "") {
         get(obj, method) {
             method = method.toLowerCase();
             if (method in obj) return obj[method]
-            return obj[method] = async () => {
+            return obj[method] = async function () {
                 const res = await fetch(baseURL + "/" + encodeURIComponent(method), {
                     method: "POST",
                     body: JSON.stringify(Array.prototype.slice.call(arguments)),
