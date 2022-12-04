@@ -1,10 +1,41 @@
 <html>
 <body>
+
+<nav>
+    <ul>
+        <li>
+            <a href="/openapi">API schema</a>
+            <a href="/api">API server</a>
+            <a href="/static/js/rpc.min.js">JS helper</a>
+        </li>
+    </ul>
+</nav>
+
+<div>
+    Calculator
+    <input type="number" placeholder="a" id="a" value="1"> + <input type="number" placeholder="b" id="b" value="2"> = <span
+        id="c"> ? </span>
+    <br/>
+    <button id="but">calculate</button>
+</div>
+
 <script type="module">
-    import RPC from "/js/rpc.min.js"
+    import RPC from '/static/js/rpc.min.js';
+
 
     const API = RPC("/api");
-    const total = await API.sum(1, 2);
+
+    async function calc() {
+        const a = parseFloat(document.getElementById("a").value);
+        const b = parseFloat(document.getElementById("b").value);
+        const total = await API.sum(a, b);
+        document.getElementById("c").innerText = total
+    }
+
+    document.getElementById("but").onclick = () => {
+        calc().catch((e) => console.error(e))
+    }
+
 </script>
 </body>
 </html>
