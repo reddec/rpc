@@ -42,10 +42,7 @@ func (c *Calc) Greet(name struct {
 }
 
 func TestNew(t *testing.T) {
-	r, err := New(&Calc{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	r := New(&Calc{})
 
 	t.Run("sum", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/Sum", bytes.NewBufferString("[1,2,3]"))
