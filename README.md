@@ -25,6 +25,12 @@ Supports:
     - `Foo(...) int64`
     - `Foo(...) (int64, error)`
 
+> There are two main packages: [`rpc`](https://pkg.go.dev/github.com/reddec/rpc) and [`jrpc`](https://pkg.go.dev/github.com/reddec/rpc/jrpc).
+> The  [`rpc`](https://pkg.go.dev/github.com/reddec/rpc) is array-based interaction (function arguments are mapped as-is as array),
+> and [`jrpc`](https://pkg.go.dev/github.com/reddec/rpc/jrpc) package is single-payload oriented.
+>
+> [`rpc`](https://pkg.go.dev/github.com/reddec/rpc) provides less restrictions for Go side, while [`jrpc`](https://pkg.go.dev/github.com/reddec/rpc/jrpc) more friendly for UI and code-generators.
+
 Simplest possible example:
 
 ```go
@@ -139,7 +145,6 @@ func main() {
 Now, on call `api.greet()`, first will be executed `newSession` and then `userSession.Greet`
 
 ### Supporting tools
-
 
 #### RPC script
 
