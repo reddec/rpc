@@ -4,7 +4,7 @@
 
 > Calling Golang backend should be simple.
 
-- no dependencies
+- no runtime dependencies (for TS generator there is a compile-time dependency)
 - 100% test coverage
 - simple and efficient
 

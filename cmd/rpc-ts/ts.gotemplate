@@ -1,0 +1,48 @@
+[[.API.Description | comment 0]]
+export default class [[.API.Name]] {
+
+    constructor(private readonly baseURL: string = ".") {}
+    [[range $method := .API.Methods]]
+    [[- if $method.Description]]
+    [[ $method.Description | comment 4 ]]
+    [[- end]]
+    async [[$method.Name]](
+    [[- range $index, $arg := $method.Args]]
+    [[- if gt $index 0 -]], [[end -]]
+    [[$arg.Name]]: [[$arg.TS.Render]]
+    [[- end -]]
+    ): [[if $method.Result -]]
+    Promise<[[$method.Result.TS.Render]]>
+    [[- else -]]
+    Promise<void>
+    [[- end]] {
+        [[- if $method.Result ]]
+        return (await this.invoke("[[$method.Name]]", [ [[$method.ArgNames | join ", "]] ])) as [[$method.Result.TS.Render]]
+        [[- else]]
+        await this.invoke("[[$method.Name]]", [ [[$method.ArgNames | join ", "]] ])
+        [[- end]]
+    }
+    [[end]]
+    private async invoke(method: string, args: any[]): Promise<any> {
+        const res = await fetch(this.baseURL + "/" + encodeURIComponent(method), {
+            method: "POST",
+            body: JSON.stringify(args),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        if (!res.ok) throw new Error(await res.text());
+        return await res.json()
+    }
+}
+[[range $typeName, $fields := .Objects]]
+export interface [[$typeName]] {
+    [[- range $index, $field := $fields ]]
+    [[$field.Name]][[- if $field.Optional]]?[[end]]: [[$field.TS.Render]]
+    [[- end ]]
+}
+[[end]]
+
+[[- range $typeName, $type := .Aliases]]
+export type [[$typeName]] = [[$type.TS.Render]];
+[[end]]

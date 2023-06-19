@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	_ "embed"
+	"encoding/xml"
 	"flag"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/reddec/rpc"
 	"github.com/reddec/rpc/schema"
@@ -12,6 +15,77 @@ import (
 
 //go:embed index.html
 var mainPage []byte
+
+type Encoder int
+
+type SomeType struct {
+	Name     string
+	Age      int    `json:"the_age"`
+	Enabled  bool   `json:",omitempty"`
+	Password string `json:"-"`
+	Ref      *int
+}
+
+// Calc is API server.
+// Multiple line
+// docs are
+// also supported
+//
+//go:generate go run github.com/reddec/rpc/cmd/rpc-ts@latest
+type Calc struct {
+	name string
+}
+
+// Name of the person
+func (c *Calc) Name(prefix string) calc {
+	return calc{}
+}
+
+func (c *Calc) Today() time.Time {
+	return time.Now()
+}
+
+// Update something
+func (c *Calc) Update(tp SomeType) {
+
+}
+
+func (c *Calc) Binary() []byte {
+	return []byte(c.name)
+}
+
+func (c *Calc) Bool() bool {
+	return false
+}
+
+func (c *Calc) Custom() xml.Encoder {
+	return xml.Encoder{}
+}
+
+func (c *Calc) Nillable() *time.Time {
+	t := time.Now()
+	return &t
+}
+
+func (c *Calc) Error() error {
+	return nil
+}
+
+func (c *Calc) AnotherTime() Encoder {
+	return 0
+}
+
+func (c *Calc) NillableSlice(enc Encoder) *[]*time.Time {
+	return nil
+}
+
+func (c *Calc) AnonType() struct{ X int } {
+	return struct{ X int }{X: 1}
+}
+
+func (c *Calc) Multiple(ctx context.Context, name string, a, b float64, ts time.Time) (bool, error) {
+	return false, nil
+}
 
 type calc struct {
 }
