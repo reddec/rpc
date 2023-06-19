@@ -81,6 +81,8 @@ export interface SomeType {
     the_age: number
     Enabled?: boolean
     Ref: (number | null)
+    Location: string
+    Document: any
 }
 
 export interface calc {

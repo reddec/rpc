@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	_ "embed"
+	"encoding/json"
 	"encoding/xml"
 	"flag"
 	"fmt"
@@ -24,6 +25,8 @@ type SomeType struct {
 	Enabled  bool   `json:",omitempty"`
 	Password string `json:"-"`
 	Ref      *int
+	Location time.Location
+	Document json.RawMessage
 }
 
 // Calc is API server.
@@ -31,7 +34,7 @@ type SomeType struct {
 // docs are
 // also supported
 //
-//go:generate go run github.com/reddec/rpc/cmd/rpc-ts@latest
+//go:generate go run github.com/reddec/rpc/cmd/rpc-ts@latest -shim time.Location:string
 type Calc struct {
 	name string
 }

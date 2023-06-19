@@ -61,6 +61,7 @@ func main() {
 	}
 
 	output := flag.String("out", strings.ToLower(typeName)+".ts", "Output file")
+	shim := flag.String("shim", "", "Comma-separated list of TS types shim (ex: github.com/jackc/pgtype.JSONB:any")
 	flag.Parse()
 
 	obj := scope.Lookup(typeName)
@@ -71,6 +72,15 @@ func main() {
 
 	tpl := getTemplate()
 	var tl = compile.New()
+
+	for _, opt := range strings.Split(*shim, ",") {
+		sourceType, tsType, ok := strings.Cut(opt, ":")
+		if !ok {
+			continue
+		}
+		tl.Custom(sourceType, compile.TSVar{Type: tsType})
+	}
+
 	tl.CommentLookup(func(pos token.Pos) string {
 		rp := pkg.Fset.Position(pos)
 		prevLine := pkg.Fset.File(pos).Pos(rp.Offset - rp.Column - 1)
