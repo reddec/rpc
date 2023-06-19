@@ -46,31 +46,12 @@ func main() {
 		panic("unknown package " + packageName)
 	}
 
-	// we need to "scroll" till the end of comment section
-	pkg.Fset.Iterate(func(file *token.File) bool {
-		if file.Name() == fileName {
-			pos := file.LineStart(lineNum)
-			// we found our comment, let's move forward
-			for _, f := range pkg.Syntax {
-				for _, comment := range f.Comments {
-					if comment.Pos() == pos {
-						// here our comment starts
-						lineNum = pkg.Fset.Position(comment.End()).Line + 1 // point to the next line
-						return false
-					}
-				}
-			}
-			return false
-		}
-		return true
-	})
-
 	scope := pkg.Types.Scope()
 	var typeName string
 	for _, name := range scope.Names() {
 		tp := scope.Lookup(name)
 		pos := pkg.Fset.Position(tp.Pos())
-		if pos.Filename == fileName && pos.Line == lineNum {
+		if pos.Filename == fileName && pos.Line == lineNum+1 {
 			typeName = name
 			break
 		}
