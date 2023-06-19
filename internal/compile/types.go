@@ -89,6 +89,10 @@ type TypeLookup struct {
 	comments    func(pos token.Pos) string
 }
 
+func (tl *TypeLookup) Custom(srcType string, ts TSVar) {
+	tl.customTypes[srcType] = ts
+}
+
 func (tl *TypeLookup) CommentLookup(handler func(pos token.Pos) string) {
 	tl.comments = handler
 }
@@ -176,6 +180,8 @@ func (tl *TypeLookup) CastToTypesScript(src types.Type) TSVar {
 			return TSVar{Type: "string"}
 		case pkg.Path() == "github.com/shopspring/decimal" && obj.Name() == "Decimal":
 			return TSVar{Type: "string"}
+		case pkg.Path() == "encoding/json" && obj.Name() == "RawMessage":
+			return TSVar{Type: "any"}
 		}
 		custom, ok := tl.customTypes[obj.Type().String()]
 		if ok {
