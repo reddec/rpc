@@ -138,5 +138,6 @@ func getTemplate() *template.Template {
 			}
 			return strings.Join(ans, "\n"+strings.Repeat(" ", ident))
 		},
+		"lower": strings.ToLower,
 	}).Delims("[[", "]]").Parse(templateText))
 }

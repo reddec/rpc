@@ -17,9 +17,9 @@ export default class [[.API.Name]] {
     Promise<void>
     [[- end]] {
         [[- if $method.Result ]]
-        return (await this.invoke("[[$method.Name]]", [ [[$method.ArgNames | join ", "]] ])) as [[$method.Result.TS.Render]]
+        return (await this.invoke("[[$method.Name | lower]]", [ [[$method.ArgNames | join ", "]] ])) as [[$method.Result.TS.Render]]
         [[- else]]
-        await this.invoke("[[$method.Name]]", [ [[$method.ArgNames | join ", "]] ])
+        await this.invoke("[[$method.Name | lower]]", [ [[$method.ArgNames | join ", "]] ])
         [[- end]]
     }
     [[end]]

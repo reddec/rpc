@@ -8,52 +8,52 @@ export default class Calc {
     
     // Name of the person
     async Name(prefix: string): Promise<calc> {
-        return (await this.invoke("Name", [ prefix ])) as calc
+        return (await this.invoke("name", [ prefix ])) as calc
     }
     
     async Today(): Promise<string> {
-        return (await this.invoke("Today", [  ])) as string
+        return (await this.invoke("today", [  ])) as string
     }
     
     // Update something
     async Update(tp: SomeType): Promise<void> {
-        await this.invoke("Update", [ tp ])
+        await this.invoke("update", [ tp ])
     }
     
     async Binary(): Promise<string> {
-        return (await this.invoke("Binary", [  ])) as string
+        return (await this.invoke("binary", [  ])) as string
     }
     
     async Bool(): Promise<boolean> {
-        return (await this.invoke("Bool", [  ])) as boolean
+        return (await this.invoke("bool", [  ])) as boolean
     }
     
     async Custom(): Promise<Encoder> {
-        return (await this.invoke("Custom", [  ])) as Encoder
+        return (await this.invoke("custom", [  ])) as Encoder
     }
     
     async Nillable(): Promise<(string | null)> {
-        return (await this.invoke("Nillable", [  ])) as (string | null)
+        return (await this.invoke("nillable", [  ])) as (string | null)
     }
     
     async Error(): Promise<void> {
-        await this.invoke("Error", [  ])
+        await this.invoke("error", [  ])
     }
     
     async AnotherTime(): Promise<Encoder1> {
-        return (await this.invoke("AnotherTime", [  ])) as Encoder1
+        return (await this.invoke("anothertime", [  ])) as Encoder1
     }
     
     async NillableSlice(enc: Encoder1): Promise<((string | null)[] | null)> {
-        return (await this.invoke("NillableSlice", [ enc ])) as ((string | null)[] | null)
+        return (await this.invoke("nillableslice", [ enc ])) as ((string | null)[] | null)
     }
     
     async AnonType(): Promise<Anon> {
-        return (await this.invoke("AnonType", [  ])) as Anon
+        return (await this.invoke("anontype", [  ])) as Anon
     }
     
     async Multiple(name: string, a: number, b: number, ts: string): Promise<boolean> {
-        return (await this.invoke("Multiple", [ name, a, b, ts ])) as boolean
+        return (await this.invoke("multiple", [ name, a, b, ts ])) as boolean
     }
     
     private async invoke(method: string, args: any[]): Promise<any> {
